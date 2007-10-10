@@ -61,7 +61,7 @@
             (or (apply f cars)
                 (apply exists f cdrs)))))))
 
-(define make-hashtable 
+(define make-eq-hashtable 
   (lambda () (cons '() #f)))
 
 (define hashtable-ref 

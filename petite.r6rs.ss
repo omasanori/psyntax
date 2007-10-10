@@ -34,7 +34,7 @@
   (let ([p (open-output-string)])
     (values p (lambda () (get-output-string p)))))
 
-(define make-hashtable make-hash-table)
+(define make-eq-hashtable make-hash-table)
 (define hashtable-ref get-hash-table)
 (define hashtable-set! put-hash-table!)
 (define hashtable? hash-table?)

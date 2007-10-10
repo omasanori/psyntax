@@ -74,7 +74,7 @@
   (let ([p (open-output-string)])
     (values p (lambda () (get-output-string p)))))
 
-(define make-hashtable 
+(define make-eq-hashtable 
   (lambda () (cons '() #f)))
 
 (define hashtable-ref 
