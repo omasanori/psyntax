@@ -20,7 +20,8 @@
 
 (library (psyntax compat)
   (export make-parameter parameterize define-record pretty-print
-          gensym void eval-core symbol-value set-symbol-value!)
+          gensym void eval-core symbol-value set-symbol-value!
+          file-options-spec)
   (import 
     (rnrs)
     (only (psyntax system $bootstrap)
@@ -156,6 +157,9 @@
                        (error 'mutator "~s is not of type ~s" x
                               'name))))
                ...)))))))
+
+  (define (file-options-spec x) 
+    (error 'file-options-spec "not implemented"))
 
 )
 
