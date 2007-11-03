@@ -188,6 +188,7 @@
     (rs          (rnrs records syntactic)              #t    #t)
     ($all        (psyntax system $all)                 #f    #t)
     ($boot       (psyntax system $bootstrap)           #f    #t)
+    (gambit      (gambit)                              #t    #f)
     ))
 
 ;;; required? flag means that said library is required for 
@@ -941,6 +942,9 @@
     (module                   cm)
     (syntax-dispatch ) ; only goes to $all
     (syntax-error    ) ; only goes to $all
+    ;;; gambit-specific exports
+    (object->serial-number    gambit)
+    (serial-number->object    gambit)
     ))
 
 
