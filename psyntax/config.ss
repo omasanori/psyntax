@@ -22,8 +22,12 @@
   (export if-wants-define-record if-wants-define-struct 
           if-wants-case-lambda
           if-wants-letrec* if-wants-global-defines
-          if-wants-library-letrec*)
+          if-wants-library-letrec*
+          base-of-interaction-library)
   (import (rnrs))
+
+  (define (base-of-interaction-library) '(rnrs))
+
   (define-syntax define-option
     (syntax-rules ()
       ((_ name #t) 

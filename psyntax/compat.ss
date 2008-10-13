@@ -23,7 +23,9 @@
           gensym void eval-core symbol-value set-symbol-value!
           file-options-spec read-library-source-file
           annotation? annotation-expression annotation-stripped
-          read-annotated annotation-source)
+          read-annotated annotation-source
+          library-version-mismatch-warning
+          file-locator-resolution-error)
   (import 
     (rnrs)
     (only (psyntax system $bootstrap)
@@ -69,6 +71,19 @@
                    swap
                    (lambda () b b* ...)
                    swap)))))))))
+
+    
+  (define (library-version-mismatch-warning name depname filename)
+    ;;; please override this in your production implementation
+    (display "Warning: inconsistent dependencies: ")
+    (display name)
+    (display depname)
+    (display filename))
+
+      
+  (define (file-locator-resolution-error libname failed-list)
+    ;;; please override this in your production implementation
+    (error 'file-location "cannot find library" libname))
 
   ;;; we represent records as vectors for portability but this is 
   ;;; not nice.  If your system supports compile-time generative

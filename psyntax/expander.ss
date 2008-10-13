@@ -847,7 +847,7 @@
                        (syntax-match t (lits ...) cls* ...))))))))
         ((_ expr (lits ...) (pat body) cls* ...)
          (for-all sys.identifier? (syntax (lits ...)))
-         (let-values (((pattern ids/levels) 
+         (let-values (((pattern ids/levels)
                        (convert-pattern (syntax pat) (syntax (lits ...)))))
            (with-syntax ((pattern (sys.datum->syntax (syntax here) pattern))
                          (((ids . levels) ...) ids/levels))
@@ -3527,9 +3527,9 @@
                                             errstr name))))))))
                             export-subst)
                           (let ((invoke-body
-                                 (build-library-letrec* no-source
-                                   lex* (if top? #f loc*) rhs*
-                                   (if (null? init*) 
+                                 (build-library-letrec* no-source top?
+                                   lex* loc* rhs* 
+                                   (if (null? init*)
                                        (build-void)
                                        (build-sequence no-source init*))))
                                 ;(invoke-body
@@ -3939,7 +3939,8 @@
     (let ((the-env #f))
       (lambda ()
         (or the-env 
-            (let ((lib (find-library-by-name '(ikarus interaction)))
+            (let ((lib (find-library-by-name
+                         (base-of-interaction-library)))
                   (rib (make-empty-rib)))
               (let ((subst (library-subst lib))) 
                 (set-rib-sym*! rib (map car subst))

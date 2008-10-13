@@ -29,8 +29,7 @@
   (psyntax internal)
   (psyntax compat)
   (psyntax library-manager)
-  (psyntax expander)
-  )
+  (psyntax expander))
 
 (display "Starting ...\n")
 

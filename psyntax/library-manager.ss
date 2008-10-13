@@ -131,17 +131,8 @@
                   (failed-list '()))
             (cond
               ((null? ls)
-               (let ()
-                 (raise 
-                   (condition 
-                     (make-error)
-                     (make-who-condition 'expander)
-                     (make-message-condition
-                       "cannot locate library in library-path")
-                     (make-irritants-condition
-                       (list x (reverse failed-list)))
-                     ))))
-              ((null? exts) 
+               (file-locator-resolution-error x (reverse failed-list)))
+              ((null? exts)
                (f (cdr ls) (library-extensions) failed-list))
               (else
                (let ((name (string-append (car ls) str (car exts))))
@@ -202,9 +193,7 @@
                       ((and (library? l) (eq? label (library-id l)))
                        (f (cdr deps)))
                       (else 
-                        (display "inconsistency: ")
-                        (display name)
-                        (display filename)
+                       (library-version-mismatch-warning name dname filename)
                        #f)))))))))
         (others #f))))
 
