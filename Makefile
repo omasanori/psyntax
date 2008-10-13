@@ -1,8 +1,10 @@
 
-all: psyntax-ikarus.pp     psyntax-petite.pp   psyntax-mzscheme.pp \
-     psyntax-gambit.pp     psyntax-gosh.pp     psyntax-chicken.pp \
-     psyntax-larceny.pp    psyntax-sisc.pp     psyntax-bigloo.pp \
-     psyntax-mit-scheme.pp psyntax-scheme48.pp
+all: psyntax-ikarus.pp     psyntax-petite.pp     \
+     psyntax-gambit.pp     psyntax-chicken.pp    \
+     psyntax-larceny.pp    psyntax-sisc.pp       \
+     psyntax-bigloo.pp     psyntax-mit-scheme.pp \
+     psyntax-scheme48.pp
+    # psyntax-mzscheme.pp psyntax-gosh.pp   \
 
 SCHEME_SRC=psyntax-buildscript.ss psyntax/builders.ss psyntax/compat.ss\
            psyntax/config.ss psyntax/expander.ss psyntax/internal.ss\

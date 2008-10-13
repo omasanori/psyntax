@@ -21,12 +21,24 @@
 (library (psyntax compat)
   (export make-parameter parameterize define-record pretty-print
           gensym void eval-core symbol-value set-symbol-value!
-          file-options-spec)
+          file-options-spec read-library-source-file
+          annotation? annotation-expression annotation-stripped
+          read-annotated annotation-source)
   (import 
     (rnrs)
     (only (psyntax system $bootstrap)
           void gensym eval-core set-symbol-value! symbol-value 
           pretty-print))
+
+  (define (annotation? x) #f)
+  (define (annotation-source x) #f)
+  (define (annotation-expression x) x)
+  (define (annotation-stripped x) x)
+  (define read-annotated read)
+
+  (define read-library-source-file
+    (lambda (file-name)
+      (with-input-from-file file-name read)))
 
   (define make-parameter
     (case-lambda
@@ -74,14 +86,15 @@
   ;;;
   ;;;   (define-syntax define-record
   ;;;     (syntax-rules ()
-  ;;;       [(_ name (field* ...) printer) 
-  ;;;        (define-record name (field* ...))]
-  ;;;       [(_ name (field* ...))
+  ;;;       ((_ name (field* ...) printer) 
+  ;;;        (define-record name (field* ...)))
+  ;;;       ((_ name (field* ...))
   ;;;        (define-record-type name 
   ;;;           (sealed #t)     ; for better performance
   ;;;           (opaque #t)     ; for security
   ;;;           (nongenerative) ; for sanity
-  ;;;           (fields field* ...))]))
+  ;;;           (fields field* ...)))))
+
 
   (define-syntax define-record
     (lambda (stx)

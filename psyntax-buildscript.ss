@@ -21,6 +21,7 @@
 (import 
   (rnrs base)
   (rnrs control)
+  (rnrs programs)
   (rnrs io simple)
   (rnrs io ports)
   (rnrs lists)
@@ -31,6 +32,7 @@
   (psyntax expander)
   )
 
+(display "Starting ...\n")
 
 (define scheme-library-files
   '("psyntax/compat.ss"
@@ -61,11 +63,7 @@
     (letrec              (core-macro . letrec))
     (letrec*             (core-macro . letrec*))
     (if                  (core-macro . if))
-    (when                (core-macro . when))         
-    (unless              (core-macro . unless))
     (parameterize        (core-macro . parameterize))
-    (case                (core-macro . case))
-    (let-values          (core-macro . let-values))
     (record-type-descriptor (core-macro . record-type-descriptor))
     (record-constructor-descriptor (core-macro . record-constructor-descriptor))
     (define-struct       (macro . define-struct))
@@ -75,6 +73,11 @@
     (quasisyntax         (macro . quasisyntax))
     (with-syntax         (macro . with-syntax))
     (identifier-syntax   (macro . identifier-syntax))
+    (when                (macro . when))         
+    (unless              (macro . unless))
+    (case                (macro . case))
+    (let-values          (macro . let-values))
+    (let*-values         (macro . let*-values))
     (let                 (macro . let))
     (let*                (macro . let*))
     (cond                (macro . cond))
@@ -941,6 +944,65 @@
     (module                   cm)
     (syntax-dispatch ) ; only goes to $all
     (syntax-error    ) ; only goes to $all
+    (assertion-error                             )
+
+    (&condition-rtd)
+    (&condition-rcd)
+    (&message-rtd)
+    (&message-rcd)
+    (&warning-rtd)
+    (&warning-rcd)
+    (&serious-rtd)
+    (&serious-rcd)
+    (&error-rtd)
+    (&error-rcd)
+    (&violation-rtd)
+    (&violation-rcd)
+    (&assertion-rtd)
+    (&assertion-rcd)
+    (&irritants-rtd)
+    (&irritants-rcd)
+    (&who-rtd)
+    (&who-rcd)
+    (&non-continuable-rtd)
+    (&non-continuable-rcd)
+    (&implementation-restriction-rtd)
+    (&implementation-restriction-rcd)
+    (&lexical-rtd)
+    (&lexical-rcd)
+    (&syntax-rtd)
+    (&syntax-rcd)
+    (&undefined-rtd)
+    (&undefined-rcd)
+    (&i/o-rtd)
+    (&i/o-rcd)
+    (&i/o-read-rtd)
+    (&i/o-read-rcd)
+    (&i/o-write-rtd)
+    (&i/o-write-rcd)
+    (&i/o-invalid-position-rtd)
+    (&i/o-invalid-position-rcd)
+    (&i/o-filename-rtd)
+    (&i/o-filename-rcd)
+    (&i/o-file-protection-rtd)
+    (&i/o-file-protection-rcd)
+    (&i/o-file-is-read-only-rtd)
+    (&i/o-file-is-read-only-rcd)
+    (&i/o-file-already-exists-rtd)
+    (&i/o-file-already-exists-rcd)
+    (&i/o-file-does-not-exist-rtd)
+    (&i/o-file-does-not-exist-rcd)
+    (&i/o-port-rtd)
+    (&i/o-port-rcd)
+    (&i/o-decoding-rtd)
+    (&i/o-decoding-rcd)
+    (&i/o-encoding-rtd)
+    (&i/o-encoding-rcd)
+    (&no-infinities-rtd)
+    (&no-infinities-rcd)
+    (&no-nans-rtd)
+    (&no-nans-rcd)
+
     ))
 
 
@@ -1027,25 +1089,25 @@
   (define (build-library legend-entry)
     (let ((key (car legend-entry))
           (name (cadr legend-entry))
-          (visible? (caddr legend-entry)))
+          (visible? (caddr legend-entry))) 
       (let ((id     (gensym))
             (name       name)
-            (version     (if (eq? (car name) 'rnrs) '(6) '()))
+            (version    (if (eq? (car name) 'rnrs) '(6) '()))
             (import-libs '())
             (visit-libs  '())
             (invoke-libs '()))
         (let-values (((subst env)
-                      (if (equal? name '(psyntax system $all))
+                      (if (equal? name '(psyntax system $all)) 
                           (values export-subst export-env)
                           (values
                             (get-export-subset key export-subst)
                             '()))))
-          `(install-library
+          `(install-library 
              ',id ',name ',version ',import-libs ',visit-libs ',invoke-libs
-             ',subst ',env values values ',visible?)))))
-  (let ((code `(library (psyntax primlocs)
+             ',subst ',env values values '#f '#f ',visible? '#f)))))
+  (let ((code `(library (ikarus primlocs)
                   (export) ;;; must be empty
-                  (import
+                  (import 
                     (only (psyntax library-manager)
                           install-library)
                     (only (psyntax internal)
@@ -1058,45 +1120,66 @@
                         ((assq x ',primlocs) => cdr)
                         (else #f))))
                   ,@(map build-library library-legend))))
-    (let-values (((code empty-subst empty-env)
+    (let-values (((name code empty-subst empty-env)
                   (boot-library-expand code)))
-       code)))
+       (values name code))))
 
 (define (make-init-code)
-  (values '() '() '()))
+  (values '() '() '() '()))
+
+(define verbose-output? #t)
+
+(define (printf msg . args)
+  (display msg)
+  (for-each (lambda (x) (display " ") (display x)) args)
+  (newline))
+
+(define debugf
+  (if verbose-output?
+      printf
+      (case-lambda
+        ((str) (printf str))
+        ((str . args) (printf ".")))))
+
+
+(define (load x proc)
+  (with-input-from-file x
+    (lambda ()
+      (let f ()
+        (let ((x (read)))
+          (unless (eof-object? x)
+            (proc x)
+            (f)))))))
 
 (define (expand-all files)
+  ;;; remove all re-exported identifiers (those with labels in
+  ;;; subst but not binding in env).
   (define (prune-subst subst env)
-    (cond
-      ((null? subst) '())
-      ((not (assq (cdar subst) env)) (prune-subst (cdr subst) env))
+    (cond 
+      ((null? subst) '()) 
+      ((not (assq (cdar subst) env)) (prune-subst (cdr subst) env)) 
       (else (cons (car subst) (prune-subst (cdr subst) env)))))
-  (define (load file proc)
-    (with-input-from-file file
-       (lambda ()
-         (let f ()
-           (let ((x (read)))
-             (unless (eof-object? x) 
-               (proc x)
-               (f)))))))
-  (let-values (((code* subst env) (make-init-code)))
+  (let-values (((name* code* subst env) (make-init-code)))
+    (debugf "Expanding ")
     (for-each
       (lambda (file)
-        (display "expanding ")
-        (display file)
-        (newline)
+        (debugf " ~s" file)
         (load file
-          (lambda (x)
-            (let-values (((code export-subst export-env)
+          (lambda (x) 
+            (let-values (((name code export-subst export-env)
                           (boot-library-expand x)))
+               (set! name* (cons name name*))
                (set! code* (cons code code*))
                (set! subst (append export-subst subst))
                (set! env (append export-env env))))))
       files)
+    (debugf "\n")
     (let-values (((export-subst export-env export-locs)
                   (make-system-data (prune-subst subst env) env)))
-      (let ((code (build-system-library export-subst export-env export-locs)))
-        (values
+      (let-values (((name code)
+                    (build-system-library export-subst export-env export-locs)))
+        (values 
+          (reverse (cons* (car name*) name (cdr name*)))
           (reverse (cons* (car code*) code (cdr code*)))
           export-locs)))))
 
@@ -1144,7 +1227,7 @@
                               bootstrap-collection))
                 (install-library
                    id name version import-libs visit-libs invoke-libs
-                   subst env values values visible?)))))))
+                   subst env values values '#f '#f visible? '#f)))))))
     (for-each build-library library-legend)))
 
 (let ()
@@ -1165,12 +1248,14 @@
     generate-temporaries = + datum->syntax string->symbol
     string-append symbol->string syntax->datum gensym length 
     open-string-output-port identifier? free-identifier=? exists
-    values call-with-values for-all))
+    values call-with-values for-all ellipsis-map assertion-violation
+    assertion-error null? car cdr pair? bound-identifier=? vector
+    eq? reverse))
 
 
 
 
-(let-values (((core* locs)
+(let-values (((name* core* locs)
                (parameterize ((current-library-collection bootstrap-collection))
                  (expand-all scheme-library-files))))
     (current-primitive-locations
@@ -1192,6 +1277,6 @@
       (close-output-port p)))
 
 (display "Happy Happy Joy Joy\n")
-
+(exit 0)
 
 ;;; vim:syntax=scheme

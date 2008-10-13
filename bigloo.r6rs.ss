@@ -76,6 +76,19 @@
       ((assq x (car h)) => (lambda (p) (set-cdr! p v)))
       (else (set-car! h (cons (cons x v) (car h)))))))
 
+(define hashtable-entries
+  (lambda (h)
+    (values
+      (list->vector (map car (car h)))
+      (list->vector (map cdr (car h))))))
+
+(define ellipsis-map map)
+
+(define (vector-for-each f . vecs)
+  (apply for-each f (map vector->list vecs)))
+
+(define (assertion-violation . args)
+  (apply error args))
 (define gensym-count 0)
 (define session-id 0)
 (define strip

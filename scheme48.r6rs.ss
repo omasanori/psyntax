@@ -102,6 +102,35 @@
       ((assq x (car h)) => (lambda (p) (set-cdr! p v)))
       (else (set-car! h (cons (cons x v) (car h)))))))
 
+(define hashtable-entries
+  (lambda (h)
+    (values
+      (list->vector (map car (car h)))
+      (list->vector (map cdr (car h))))))
+
+(define ellipsis-map map)
+
+(define (assertion-violation . args)
+  (apply error args))
+
+(define (vector-for-each f . vecs)
+  (apply for-each f (map vector->list vecs)))
+
+(define condition list)
+(define (make-error) 'error)
+(define (make-who-condition x) `(who: ,x))
+(define (make-message-condition x) `(msg: ,x))
+(define (make-irritants-condition x) `(irritants: ,x))
+(define raise 
+  (lambda (con)
+    (error 'raise "condition=~a" con)))
+(define (assertion-violation . args)
+  (apply error args))
+
+
+
+
+
 (define char<=?
   (let ((char<=? char<=?))
     (lambda args

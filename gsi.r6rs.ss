@@ -89,7 +89,16 @@
       ((assq x (car h)) => (lambda (p) (set-cdr! p v)))
       (else (set-car! h (cons (cons x v) (car h)))))))
 
+(define hashtable-entries
+  (lambda (h)
+    (values
+      (list->vector (map car (car h)))
+      (list->vector (map cdr (car h))))))
 
+(define (vector-for-each f . vecs)
+  (apply for-each f (map vector->list vecs)))
+
+(define ellipsis-map map)
 
 (define gensym-count 0)
 (define session-id 0)
@@ -112,6 +121,11 @@
                        (number->string session-id)
                        "$"
                        (number->string i))))))
+(define raise 
+  (lambda (con)
+    (error 'raise "condition=~a" con)))
+(define (assertion-violation . args)
+  (apply error args))
 
 (if (file-exists? "session-id")
   (begin

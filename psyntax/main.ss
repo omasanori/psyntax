@@ -38,7 +38,7 @@
                    (if (eof-object? x) 
                        '()
                        (cons x (f)))))))))
-      (eval-r6rs-top-level x*)))
+      ((compile-r6rs-top-level x*))))
 
   (display "r6rs psyntax ready\n")
   (let ((args (command-line)))

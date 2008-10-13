@@ -33,12 +33,24 @@
   (let ([p (open-output-string)])
     (values p (lambda () (get-output-string p)))))
 
-(define make-eq-hashtable make-hash-table)
+(define make-eq-hashtable 
+  (lambda () (vector 'hashtable '())))
+
 (define hashtable-ref 
   (lambda (h x v) 
-    (hash-table-get h x (lambda () v))))
-(define hashtable-set! hash-table-put!)
-(define hashtable? hash-table?)
+    (cond
+      [(assq x (vector-ref h 1)) => cdr]
+      [else v])))
+
+(define hashtable-set! 
+  (lambda (h x v)
+    (vector-set! h 1 (cons (cons x v) (vector-ref h 1)))))
+
+(define hashtable? 
+  (lambda (x)
+    (and (vector? x) (= (vector-length x) 2)
+         (eq? (vector-ref x 0) 'hashtable))))
+
 
 (define command-line 
   (lambda () 

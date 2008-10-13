@@ -34,10 +34,8 @@
   (let ([p (open-output-string)])
     (values p (lambda () (get-output-string p)))))
 
-(define make-eq-hashtable make-hash-table)
-(define hashtable-ref get-hash-table)
-(define hashtable-set! put-hash-table!)
-(define hashtable? hash-table?)
+(define ellipsis-map map)
+
 (print-gensym #f)
 (print-brackets #f)
 (print-vector-length #f)
@@ -83,6 +81,17 @@
 (with-output-to-file "session-id" 
   (lambda () 
     (write (+ 1 session-id))))
+
+(define condition list)
+(define (make-error) 'error)
+(define (make-who-condition x) `(who: ,x))
+(define (make-message-condition x) `(msg: ,x))
+(define (make-irritants-condition x) `(irritants: ,x))
+(define raise 
+  (lambda (con)
+    (error 'raise "condition=~a" con)))
+(define (assertion-violation . args)
+  (apply error args))
 
 (load "psyntax.pp")
 

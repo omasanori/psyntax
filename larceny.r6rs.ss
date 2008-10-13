@@ -82,12 +82,18 @@
       ((assq x (car h)) => cdr)
       (else v))))
 
+
 (define hashtable-set! 
   (lambda (h x v) 
     (cond
       ((assq x (car h)) => (lambda (p) (set-cdr! p v)))
       (else (set-car! h (cons (cons x v) (car h)))))))
-
+(define hashtable-entries
+  (lambda (h)
+    (values
+      (list->vector (map car (car h)))
+      (list->vector (map cdr (car h))))))
+(define ellipsis-map map)
 (integrate-procedures #f)
 (define char<=?
   (let ((char<=? char<=?))

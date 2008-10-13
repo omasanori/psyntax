@@ -87,6 +87,17 @@
       ((assq x (car h)) => (lambda (p) (set-cdr! p v)))
       (else (set-car! h (cons (cons x v) (car h)))))))
 
+(define hashtable-entries
+  (lambda (h)
+    (values
+      (list->vector (map car (car h)))
+      (list->vector (map cdr (car h))))))
+
+(define ellipsis-map map)
+
+(define (assertion-violation . args)
+  (apply error args))
+
 (define gensym-count 0)
 (define session-id 0)
 (define strip
@@ -130,5 +141,16 @@
   ;;; how do you get it in mit-scheme?
   (display "hardcoded command-line in mit-scheme.r6rs.ss\n")
   (list "mit-scheme" "psyntax-buildscript.ss"))
+
+(if (file-exists? "session-id")
+  (begin
+    (set! session-id 
+      (with-input-from-file "session-id" read))
+    (delete-file "session-id")))
+
+(with-output-to-file "session-id" 
+  (lambda () 
+    (write (+ 1 session-id))))
+
 
 (load "psyntax.pp")
