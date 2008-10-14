@@ -1,0 +1,81 @@
+
+For this exercise, we would like to:
+
+ 1. create a library for an implementation, say (gambit).
+ 2. add some exports that the implementation provides to the
+ library, say object->serial-number and serial-number->object.
+
+We will limit the added exports to primitives which require
+no special syntax.  In later series, we'll see how those can
+be added.
+
+
+Steps:
+  
+1. Modify psyntax-buildscript.ss as follows:
+
+ a. Add the library to the set of libraries:
+
+  (define library-legend
+    ;; abbr.       name                             visible? required?
+    '((interaction (ikarus interaction)                  #t    #f)
+      (ne          (psyntax null-environment-5)          #t    #f)
+      (se          (psyntax scheme-report-environment-5) #t    #f)
+      ...
+      (gambit      (gambit)                              #t    #f)
+      ))
+
+ b. Add a bunch of exported primitives to the library:
+  (define identifier->library-map
+    '(
+      ;;;
+      (lambda                                     r ba se ne)
+      (and                                        r ba se ne)
+      ...
+      ;;; gambit-specific exports
+      (object->serial-number    gambit)
+      (serial-number->object    gambit)
+      ))
+
+2. Rebuild the expanded psyntax code by running:
+
+   $ make psyntax-gambit.pp
+
+   This produces psyntax-gambit.pp which has the new library
+   and exports.
+
+3. Write a small script (call it gambit-test.ss) which contains:
+
+   (import (rnrs) (gambit))
+   (write (object->serial-number 'foo)) 
+   (newline)
+   (write (eq? 'foo 
+                (serial-number->object 
+                  (object->serial-number 'foo))))
+   (newline)
+
+
+   *** I added gambit-test.ss to the examples.
+ 
+4. Run the script:
+
+   $ ./gsi.r6rs.ss gambit-test.ss 
+   r6rs psyntax ready
+   2
+   #t
+
+If you have a list of all of your implementation's primitives, 
+please email it to me and I'll integrate them with the
+standard distribution so that you won't have to do that every
+time I make a change.
+
+
+
+TODO: (gambit) should not be visible unless we're in gambit,
+but to do so requires determining which host we're running
+under.   I might simply just add a (implementation-name)
+procedure that returns the name of the implementation, and
+set that primitive in the implementation-specific startup
+file.
+
+
