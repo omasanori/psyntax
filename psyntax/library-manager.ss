@@ -24,7 +24,8 @@
     find-library-by-name install-library library-spec invoke-library 
     current-library-expander
     current-library-collection library-path library-extensions
-    serialize-all current-precompiled-library-loader)
+    serialize-all current-precompiled-library-loader
+    library-invoke-dependencies library-invoke-code)
   (import (rnrs) (psyntax compat) (rnrs r5rs))
 
   (define (make-collection)
@@ -61,6 +62,10 @@
               (library-name x)
               (append (library-name x) (list (library-version x)))))
         p)))
+
+    
+  (define (library-invoke-dependencies lib)
+    (library-inv* lib))
 
   (define (find-dependencies ls)
     (cond

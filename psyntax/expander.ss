@@ -31,7 +31,8 @@
           null-environment scheme-report-environment
           interaction-environment
           ellipsis-map assertion-error 
-          environment environment? environment-symbols)
+          environment environment? environment-symbols
+          top-level-expander)
   (import
     (except (rnrs)
       environment environment? identifier?
