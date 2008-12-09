@@ -1164,41 +1164,39 @@
               '()
               (cons x (f))))))))
 
+(define (expand-top-level forms)
+  (parameterize ((current-library-collection bootstrap-collection))
+    (let-values ([(req* exp) (top-level-expander forms)])
+      (current-primitive-locations (lambda (x) x))
+      (let ([codes '()])
+        (define serialize
+          (let ([ls '()])
+            (lambda (lib)
+              (unless (memq lib ls)
+                (set! ls (cons lib ls))
+                (for-each serialize (library-invoke-dependencies lib))
+                (let ([p (cons (library-name lib)
+                               (library-invoke-code lib))])
+                  (set! codes (cons p codes)))))))
+        (for-each serialize req*)
+        (reverse (cons (cons '*main* exp) codes))))))
+
 (define (expand-script filename)
   (define outfile (string-append filename ".expanded"))
-  (parameterize ((current-library-collection bootstrap-collection))
-    (let-values ([(req* exp) 
-                  (top-level-expander
-                    (read-file filename))])
-      (current-primitive-locations (lambda (x) x))
-        ;(current-primitive-locations
-        ;  (lambda (x)
-        ;    (cond
-        ;      ((assq x locs) => cdr)
-        ;      (else #f))))
-        (when (file-exists? outfile)
-          (delete-file outfile))
-        (let ((p (open-output-file outfile)))
-          (define serialize
-            (let ([ls '()])
-              (lambda (lib)
-                (unless (memq lib ls)
-                  (set! ls (cons lib ls))
-                  (for-each serialize
-                    (library-invoke-dependencies lib))
-                  (display ";;; " p)
-                  (display (library-name lib) p)
-                  (newline p)
-                  (compile-core-expr-to-port 
-                    (library-invoke-code lib) 
-                    p)))))
-          (for-each serialize req*)
-          (display ";;; " p)
-          (display filename p)
-          (newline p)
-          (compile-core-expr-to-port exp p)
-          (close-output-port p)))))
-
+  (let ([forms (expand-top-level (read-file filename))])
+    (when (file-exists? outfile)
+      (delete-file outfile))
+    (let ((p (open-output-file outfile)))
+      (for-each
+        (lambda (x) 
+           (display ";;; " p)
+           (display (car x) p)
+           (newline p)
+           (newline p)
+           (pretty-print (cdr x) p)
+           (newline p))
+        forms)
+      (close-output-port p))))
 
 (apply
   (case-lambda
